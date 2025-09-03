@@ -1,5 +1,5 @@
 from langchain_community.document_loaders import PyPDFDirectoryLoader
-from langchain_text_splitters import RecursiveCharacterTExtSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_chroma import Chroma
 from uuid import uuid4
@@ -24,3 +24,19 @@ vector_store=Chroma(
 loader=PyPDFDirectoryLoader(DATA_PATH)
 
 raw_documents=loader.load()
+
+text_splitter=RecursiveCharacterTextSplitter(
+  chunksize=300,
+  chunkoverlap=100,
+  length_function=len,
+  is_separator_regex=False,
+)
+
+#Creating the Chunks
+chunks=text_splitter.split_documents(raw_documents)
+
+#Create Unique IDs
+uuids=[str(uuid4()) for _ in range(len(chunks))]
+
+#Adding Chunks to the Vector Store
+vector_store.add_documents(documents=chunks,ids=uuids)
